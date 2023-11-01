@@ -61,3 +61,18 @@ spring.datasource.url=jdbc:mysql://localhost:3306/student_db
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 db.vcs.enabled=true //Optional
 ```
+
+#### Download Necessary Connector 
+
+Let's say I am using Mysql then I have to download necessary jar
+Example for Mysql 8 connector
+
+```
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.33</version>
+		</dependency>
+
+```
+
