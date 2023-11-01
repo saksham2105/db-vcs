@@ -19,7 +19,7 @@ This library is particularly useful for projects that require database schema an
 ### Prerequisites
 
 - Java Development Kit (JDK) 8 or higher
-- Your Java project where you plan to use this library
+- Your Java Springboot project where you plan to use this library
 
 ### Installation
 
