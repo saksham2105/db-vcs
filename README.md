@@ -90,9 +90,9 @@ Similarly for other RDBMS, download necessay connectors
 
 Create Sql file inside ```resources/db-migration``` using following way
 
-FileName : ``` V<version>__fileDescripton.sql ```
+FileName : ```V<version>__fileDescripton.sql ```
 
-Example : ```V1___createStudents.sql ````
+Example : ```V1___createStudents.sql ```
 
 Content : ```CREATE TABLE Student (
     student_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -103,5 +103,4 @@ Content : ```CREATE TABLE Student (
     email VARCHAR(100) UNIQUE,
     phone_number VARCHAR(15),
     address VARCHAR(255)
-);
-```
+);```
