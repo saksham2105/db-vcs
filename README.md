@@ -1,4 +1,4 @@
-# Database Version Control Library (dbVcs)
+# Database Version Control (dbVcs)
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
