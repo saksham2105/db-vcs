@@ -56,7 +56,7 @@ public class DemoApplication {
 
 ```
 spring.datasource.username=root
-spring.datasource.password=Saksham@2105
+spring.datasource.password=xxxxx
 spring.datasource.url=jdbc:mysql://localhost:3306/student_db
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 db.vcs.enabled=true //Optional
