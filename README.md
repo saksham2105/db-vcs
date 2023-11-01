@@ -4,7 +4,7 @@
 
 ## Overview
 
-The **Database Version Control ** is a Java library designed to help developers manage and control the versioning of their database schema and data. It provides tools and utilities for tracking changes, applying updates, and maintaining a version history of your database.
+The **Database Version Control** is a Java library designed to help developers manage and control the versioning of their database schema and data. It provides tools and utilities for tracking changes, applying updates, and maintaining a version history of your database.
 
 Key features of this library include:
 
