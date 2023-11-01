@@ -85,3 +85,23 @@ Dependency Mysql 8 connector
 ```
 
 Similarly for other RDBMS, download necessay connectors
+
+#### Usage
+
+Create Sql file inside ```resources/db-migration``` using following way
+
+FileName : ``` V<version>__fileDescripton.sql ```
+
+Example : ```V1___createStudents.sql ````
+
+Content : ```CREATE TABLE Student (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    date_of_birth DATE,
+    gender ENUM('Male', 'Female', 'Other'),
+    email VARCHAR(100) UNIQUE,
+    phone_number VARCHAR(15),
+    address VARCHAR(255)
+);
+```
