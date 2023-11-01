@@ -34,6 +34,14 @@ You can include this library in your Java project using Maven or Gradle. Add the
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 ```
+
+#### Local Installation
+Clone this Repo and run command 
+
+```mvn clean install``` (this would create a Jar in your Local maven repository)
+
+and now use above maven dependency and change version as per the need
+
 #### Java
  Enabling Version Control using Annotation
 ```java
