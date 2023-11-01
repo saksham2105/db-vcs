@@ -64,8 +64,8 @@ db.vcs.enabled=true //Optional
 
 #### Download Necessary Connector 
 
-Let's say I am using Mysql then I have to download necessary jar
-Example for Mysql 8 connector
+Download necessary connector for your RDBMS
+Dependency Mysql 8 connector
 
 ```
 		<dependency>
@@ -76,3 +76,4 @@ Example for Mysql 8 connector
 
 ```
 
+Similarly for other RDBMS, download necessay connectors
