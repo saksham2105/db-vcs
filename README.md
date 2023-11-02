@@ -84,7 +84,7 @@ Dependency Mysql 8 connector
 
 ```
 
-Similarly for other RDBMS, download necessay connectors
+Similarly for other RDBMS, download necessary connectors
 
 #### Usage
 
