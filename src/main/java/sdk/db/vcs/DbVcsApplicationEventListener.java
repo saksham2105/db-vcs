@@ -51,6 +51,9 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
             + "sql_file varchar(100) NOT NULL"
             + ")";
 
+    private static String dbVcsResourceFolder = "db-migration";
+    private static final String dbVcsMigrationLocation = "db.vcs.migration.location";
+
 
     private MessageDigest digest;
 
@@ -72,13 +75,16 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
             System.out.println("DbVcs Feature is Disabled");
             return;
         }
+        if (environment.getProperty(dbVcsMigrationLocation) != null) {
+            dbVcsResourceFolder = environment.getProperty(dbVcsMigrationLocation);
+        }
         ClassLoader cl = this.getClass().getClassLoader();
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
         try (Connection connection = dataSource.getConnection()) {
             digest = MessageDigest.getInstance("MD5");
             connection.setAutoCommit(true);
             PreparedStatement preparedStatement;
-            List<Resource> resources = Arrays.asList(resolver.getResources("classpath*:/db-migration/*.sql"));
+            List<Resource> resources = Arrays.asList(resolver.getResources(String.format("classpath*:/%s/*.sql", dbVcsResourceFolder)));
 
             resources = resources.stream().filter(this::isValidResourceFile).sorted((o1, o2) -> {
                 Integer version1 = Integer.valueOf(o1.getFilename().split("__")[0].substring(1));
@@ -92,48 +98,48 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             for (Resource resource : resources) {
-                    File file = resource.getFile();
-                    String currentVersion = file.getName().split("__")[0];
-                    String lastExecutedVersion = getLastExecutedVersion(connection);
-                    if (lastExecutedVersion != null && !isVersionExecuted(connection, currentVersion)) {
-                        Integer lastExecutedVersionNo = Integer.parseInt(lastExecutedVersion.substring(1));
-                        Integer currentExecutedVersionNo = Integer.parseInt(currentVersion.substring(1));
-                        if (currentExecutedVersionNo <= lastExecutedVersionNo) {
-                            throw new DbVcsException("Can't execute as current version " + currentVersion + " can' be less than or equals to executed version : " + lastExecutedVersion);
-                        }
+                File file = resource.getFile();
+                String currentVersion = file.getName().split("__")[0];
+                String lastExecutedVersion = getLastExecutedVersion(connection);
+                if (lastExecutedVersion != null && !isVersionExecuted(connection, currentVersion)) {
+                    Integer lastExecutedVersionNo = Integer.parseInt(lastExecutedVersion.substring(1));
+                    Integer currentExecutedVersionNo = Integer.parseInt(currentVersion.substring(1));
+                    if (currentExecutedVersionNo <= lastExecutedVersionNo) {
+                        throw new DbVcsException("Can't execute as current version " + currentVersion + " can't be less than or equals to executed version : " + lastExecutedVersion);
                     }
-                    String executedAt = dateFormat.format(new java.util.Date());
-                    FileReader fileReader = new FileReader(file);
-                    StringBuilder content = new StringBuilder();
-                    try (BufferedReader reader = new BufferedReader(fileReader) ) {
-                        int character;
-                        while ((character = reader.read()) != -1) {
-                            content.append((char) character);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                }
+                String executedAt = dateFormat.format(new java.util.Date());
+                FileReader fileReader = new FileReader(file);
+                StringBuilder content = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(fileReader) ) {
+                    int character;
+                    while ((character = reader.read()) != -1) {
+                        content.append((char) character);
                     }
-                    String fileContent = content.toString().trim();
-                    digest.update(fileContent.getBytes());
-                    byte[] md5HashBytes = digest.digest();
-                    String fileHash = getHexString(md5HashBytes);
-                    DBVcsSchema dbVcsSchema = getDbVcsSchema(connection, currentVersion);
-                    String[] queries = fileContent.split(";");
-                    if (dbVcsSchema == null) {
-                        insertInDbVcsSchema(connection, currentVersion, executedAt, fileHash, file.getName());
-                    } else {
-                        if (!fileHash.equals(dbVcsSchema.getFileHash())) {
-                            throw new DbVcsException("Invalid File Hash for : " + file.getName());
-                        }
-                        continue;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String fileContent = content.toString().trim();
+                digest.update(fileContent.getBytes());
+                byte[] md5HashBytes = digest.digest();
+                String fileHash = getHexString(md5HashBytes);
+                DBVcsSchema dbVcsSchema = getDbVcsSchema(connection, currentVersion);
+                String[] queries = fileContent.split(";");
+                if (dbVcsSchema == null) {
+                    insertInDbVcsSchema(connection, currentVersion, executedAt, fileHash, file.getName());
+                } else {
+                    if (!fileHash.equals(dbVcsSchema.getFileHash())) {
+                        throw new DbVcsException("Invalid File Hash for : " + file.getName());
                     }
-                    for (String query : queries) {
-                        query = query.replaceAll("\n", " ");
-                        if (query != null && !query.isEmpty()) {
-                            preparedStatement = connection.prepareStatement(query);
-                            preparedStatement.execute();
-                        }
+                    continue;
+                }
+                for (String query : queries) {
+                    query = query.replaceAll("\n", " ");
+                    if (query != null && !query.isEmpty()) {
+                        preparedStatement = connection.prepareStatement(query);
+                        preparedStatement.execute();
                     }
+                }
             }
         } catch (Exception e) {
             throw new DbVcsException(e.getMessage());
@@ -174,7 +180,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
     }
 
     private boolean isVersionExecuted(Connection connection,
-                                     String versionNo) {
+                                      String versionNo) {
         return getDbVcsSchema(connection, versionNo) != null;
     }
 
@@ -237,7 +243,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
                 statement.execute();
             }
         } catch (Exception exception) {
-           exception.printStackTrace();
+            exception.printStackTrace();
             throw new DbVcsException(exception.getMessage());
         }
     }
