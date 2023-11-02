@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Component
@@ -44,6 +45,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
 
     private static final String DB_VCS_SCHEMA = "db_vcs_schema";
 
+    private static final Logger logger = Logger.getLogger(DbVcsApplicationEventListener.class.getName());
     private static final String createTableSQL = "CREATE TABLE " + DB_VCS_SCHEMA + " ("
             + "version_no varchar(255) PRIMARY KEY,"
             + "executed_at varchar(100) NOT NULL,"
@@ -72,7 +74,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
         }
         featureEnabled = featureEnabled || (environment.getProperty("db.vcs.enabled") != null && environment.getProperty("db.vcs.enabled").equals("true"));
         if (!featureEnabled) {
-            System.out.println("DbVcs Feature is Disabled");
+            logger.info("DbVcs Feature is Disabled");
             return;
         }
         if (environment.getProperty(dbVcsMigrationLocation) != null) {
@@ -140,6 +142,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
                         preparedStatement.execute();
                     }
                 }
+                logger.info("Successfully executed Script : " + file.getName());
             }
         } catch (Exception e) {
             throw new DbVcsException(e.getMessage());
