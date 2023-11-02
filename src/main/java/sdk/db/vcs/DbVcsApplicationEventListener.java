@@ -44,12 +44,13 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
 
     private static final String DB_VCS_SCHEMA = "db_vcs_schema";
 
-    private static final String createTableSQL = "CREATE TABLE `" + DB_VCS_SCHEMA + "`  ("
+    private static final String createTableSQL = "CREATE TABLE " + DB_VCS_SCHEMA + " ("
             + "version_no varchar(255) PRIMARY KEY,"
             + "executed_at varchar(100) NOT NULL,"
             + "file_hash varchar(100) NOT NULL,"
             + "sql_file varchar(100) NOT NULL"
             + ")";
+
 
     private MessageDigest digest;
 
@@ -122,7 +123,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
                         insertInDbVcsSchema(connection, currentVersion, executedAt, fileHash, file.getName());
                     } else {
                         if (!fileHash.equals(dbVcsSchema.getFileHash())) {
-                            throw new RuntimeException("Invalid File Hash for : " + file.getName());
+                            throw new DbVcsException("Invalid File Hash for : " + file.getName());
                         }
                         continue;
                     }
@@ -154,6 +155,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
             return false;
         }
     }
+
     private String getLastExecutedVersion(Connection connection) {
         try {
             String sql = "SELECT version_no FROM " + DB_VCS_SCHEMA + " ORDER BY version_no DESC LIMIT 1";
