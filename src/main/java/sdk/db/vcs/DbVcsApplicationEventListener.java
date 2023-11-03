@@ -49,7 +49,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
     private static final String createTableSQL = "CREATE TABLE " + DB_VCS_SCHEMA + " ("
             + "version_no varchar(255) PRIMARY KEY,"
             + "executed_at varchar(100) NOT NULL,"
-            + "file_hash varchar(100) NOT NULL,"
+            + "file_checksum varchar(100) NOT NULL,"
             + "sql_file varchar(100) NOT NULL"
             + ")";
 
@@ -124,23 +124,23 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
                 String fileContent = content.toString().trim();
                 digest.update(fileContent.getBytes());
                 byte[] md5HashBytes = digest.digest();
-                String fileHash = getHexString(md5HashBytes);
-                DBVcsSchema dbVcsSchema = getDbVcsSchema(connection, currentVersion);
+                String fileChecksum = getHexString(md5HashBytes);
                 String[] queries = fileContent.split(";");
-                if (dbVcsSchema == null) {
-                    insertInDbVcsSchema(connection, currentVersion, executedAt, fileHash, file.getName());
-                } else {
-                    if (!fileHash.equals(dbVcsSchema.getFileHash())) {
-                        throw new DbVcsException("Invalid File Hash for : " + file.getName());
-                    }
-                    continue;
-                }
                 for (String query : queries) {
                     query = query.replaceAll("\n", " ");
                     if (query != null && !query.isEmpty()) {
                         preparedStatement = connection.prepareStatement(query);
                         preparedStatement.execute();
                     }
+                }
+                DBVcsSchema dbVcsSchema = getDbVcsSchema(connection, currentVersion);
+                if (dbVcsSchema == null) {
+                    insertInDbVcsSchema(connection, currentVersion, executedAt, fileChecksum, file.getName());
+                } else {
+                    if (!fileChecksum.equals(dbVcsSchema.getFileChecksum())) {
+                        throw new DbVcsException("Invalid File Hash for : " + file.getName());
+                    }
+                    continue;
                 }
                 logger.info("Successfully executed Script : " + file.getName());
             }
@@ -197,9 +197,9 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String executedAt = resultSet.getString("executed_at");
-                String fileHash = resultSet.getString("file_hash");
+                String fileChecksum = resultSet.getString("file_checksum");
                 String sqlFile = resultSet.getString("sql_file");
-                return new DBVcsSchema(versionNo, executedAt, fileHash, sqlFile);
+                return new DBVcsSchema(versionNo, executedAt, fileChecksum, sqlFile);
             }
             return null;
         } catch (SQLException e) {
@@ -209,13 +209,13 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
     }
 
     private void insertInDbVcsSchema(Connection connection, String versionNo,
-                                     String executedAt, String fileHash, String sqlFile) {
+                                     String executedAt, String fileChecksum, String sqlFile) {
         try {
-            String insertSQL = "INSERT INTO " + DB_VCS_SCHEMA + " (version_no, executed_at, file_hash, sql_file) VALUES (?, ?, ?, ?)";
+            String insertSQL = "INSERT INTO " + DB_VCS_SCHEMA + " (version_no, executed_at, file_checksum, sql_file) VALUES (?, ?, ?, ?)";
             PreparedStatement statement = connection.prepareStatement(insertSQL);
             statement.setString(1, versionNo);
             statement.setString(2, executedAt);
-            statement.setString(3, fileHash);
+            statement.setString(3, fileChecksum);
             statement.setString(4, sqlFile);
             statement.execute();
         } catch (Exception exception) {

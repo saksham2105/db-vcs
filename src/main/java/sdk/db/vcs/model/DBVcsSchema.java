@@ -3,13 +3,13 @@ package sdk.db.vcs.model;
 public class DBVcsSchema {
     private String versionNo;
     private String executedAt;
-    private String fileHash;
+    private String fileChecksum;
     private String sqlFile;
 
     public DBVcsSchema(String versionNo, String executedAt, String fileHash, String sqlFile) {
         this.versionNo = versionNo;
         this.executedAt = executedAt;
-        this.fileHash = fileHash;
+        this.fileChecksum = fileHash;
         this.sqlFile = sqlFile;
     }
 
@@ -29,12 +29,12 @@ public class DBVcsSchema {
         this.executedAt = executedAt;
     }
 
-    public String getFileHash() {
-        return fileHash;
+    public String getFileChecksum() {
+        return fileChecksum;
     }
 
-    public void setFileHash(String fileHash) {
-        this.fileHash = fileHash;
+    public void setFileChecksum(String fileChecksum) {
+        this.fileChecksum = fileChecksum;
     }
 
     public String getSqlFile() {
