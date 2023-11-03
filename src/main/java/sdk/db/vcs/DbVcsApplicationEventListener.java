@@ -125,6 +125,13 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
                 digest.update(fileContent.getBytes());
                 byte[] md5HashBytes = digest.digest();
                 String fileChecksum = getHexString(md5HashBytes);
+                DBVcsSchema dbVcsSchema = getDbVcsSchema(connection, currentVersion);
+                if (dbVcsSchema != null) {
+                    if (!fileChecksum.equals(dbVcsSchema.getFileChecksum())) {
+                        throw new DbVcsException("Invalid File Checksum for : " + file.getName());
+                    }
+                    continue;
+                }
                 String[] queries = fileContent.split(";");
                 for (String query : queries) {
                     query = query.replaceAll("\n", " ");
@@ -133,15 +140,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
                         preparedStatement.execute();
                     }
                 }
-                DBVcsSchema dbVcsSchema = getDbVcsSchema(connection, currentVersion);
-                if (dbVcsSchema == null) {
-                    insertInDbVcsSchema(connection, currentVersion, executedAt, fileChecksum, file.getName());
-                } else {
-                    if (!fileChecksum.equals(dbVcsSchema.getFileChecksum())) {
-                        throw new DbVcsException("Invalid File Checksum for : " + file.getName());
-                    }
-                    continue;
-                }
+                insertInDbVcsSchema(connection, currentVersion, executedAt, fileChecksum, file.getName());
                 logger.info("Successfully executed Script : " + file.getName());
             }
         } catch (Exception e) {
