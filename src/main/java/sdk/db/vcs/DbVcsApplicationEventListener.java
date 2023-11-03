@@ -138,7 +138,7 @@ public class DbVcsApplicationEventListener  implements ApplicationListener<Conte
                     insertInDbVcsSchema(connection, currentVersion, executedAt, fileChecksum, file.getName());
                 } else {
                     if (!fileChecksum.equals(dbVcsSchema.getFileChecksum())) {
-                        throw new DbVcsException("Invalid File Hash for : " + file.getName());
+                        throw new DbVcsException("Invalid File Checksum for : " + file.getName());
                     }
                     continue;
                 }
